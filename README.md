@@ -1,9 +1,7 @@
-# Project-Springboard
-This is an example datacenter deployment with [Docker](http://www.docker.com) containers and [Mesosphere](http://www.mesosphere.com/) for container management. For file storage the [Ceph](http://www.ceph.com) distributed IP based storage is used.
+# Interop 2016 - Network Continuous Integration
+This is a fully automated network with application servers connected. 100% of the configuration is managed through git and Ansible. 
 
-To provide announcements to the network of the availability of new containers, Quagga has been containerized and deployed on the Docker hosts. 
-
-To provide resiliency and ECMP without proprietary technologies [Quagga](www.nongnu.org/quagga/) is deployed on the ceph nodes. 
+The goal of this project is to demonstrate how CI tools like [Travis-CI](https://travis-ci.org/) can be leveraged to automatically spin up a virtual networking environment and automatically run integration tests against the network for any proposed changes. 
 
 #Diagrams:
 ![Diagram](diagram.png)
@@ -15,10 +13,7 @@ Server to leaf and leaf to spine routing utilize eBGP.
 
 The [BGP unnumbered](https://docs.cumulusnetworks.com/display/DOCS/Configuring+Border+Gateway+Protocol+-+BGP#ConfiguringBorderGatewayProtocol-BGP-unnumberedUsingBGPUnnumberedInterfaces) feature is used so that no IP addresses are required for any infrastructure links.
 
-Ceph servers announce loopback IP addresses to the leafs.
-Docker hosts announce container IP addresses to the leafs.
-
-The leafs announce default routes to both the Ceph and Docker hosts, allowing for full load sharing. 
+The leafs announce default routes to the hosts.
 
 #Files
 - spines.yml: This is the Ansible configuration definition to deploy spine nodes
