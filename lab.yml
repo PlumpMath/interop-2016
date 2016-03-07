@@ -1,0 +1,23 @@
+---
+- hosts: spine
+  user: root
+  roles:
+    - common
+    - spine
+  handlers:
+    - include: handlers/main.yml
+
+- hosts: leaf
+  user: root
+  roles:
+    - common
+    - leaf
+  handlers:
+    - include : handlers/main.yml
+
+- hosts: servers
+  user: root
+  roles:
+    - servers
+  handlers:
+    - include : handlers/main.yml
