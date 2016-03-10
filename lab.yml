@@ -1,22 +1,22 @@
 ---
-- hosts: spine
-  user: root
+- hosts: spines
+  sudo: yes
   roles:
     - common
-    - spine
+    - spines
   handlers:
     - include: handlers/main.yml
 
-- hosts: leaf
-  user: root
+- hosts: leafs
+  sudo: yes
   roles:
     - common
-    - leaf
+    - leafs
   handlers:
     - include : handlers/main.yml
 
 - hosts: servers
-  user: root
+  sudo: yes
   roles:
     - servers
   handlers:

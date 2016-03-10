@@ -23,11 +23,8 @@ Vagrant.configure("2") do |config|
    leaf1.vm.host_name = "leaf1"
    leaf1.vm.provision "ansible" do |ansible|
     ansible.groups = groups
-    ansible.extra_vars = {
-      loopback_ip: "172.16.0.1",
-      asn: "64601",
-    }
-     ansible.playbook = "leafs.yml"
+    #ansible.verbose = "vvv"
+    ansible.playbook = "lab.yml"
     end
   end
   
@@ -40,47 +37,35 @@ Vagrant.configure("2") do |config|
    leaf2.vm.host_name = "leaf2"
    leaf2.vm.provision "ansible" do |ansible|
     ansible.groups = groups
-      ansible.extra_vars = {
-      loopback_ip: "172.16.0.2",
-      asn: "64602",
-    }
-     ansible.playbook = "leafs.yml"
+    ansible.playbook = "lab.yml"
     end
   end
 
-  # config.vm.define "leaf3" do |leaf3| 
-  #  leaf3.vm.box = cumulus_image
-  #  leaf3.vm.network "private_network",  virtualbox__intnet: 'leaf3-spine1', auto_config: false
-  #  leaf3.vm.network "private_network",  virtualbox__intnet: 'leaf3-spine2', auto_config: false
-  #  leaf3.vm.network "private_network",  virtualbox__intnet: 'leaf3-ceph3', auto_config: false
-  #  leaf3.vm.network "private_network",  virtualbox__intnet: 'leaf3-ceph_admin', auto_config: false
-  #  leaf3.vm.host_name = "leaf3"
-  #  leaf3.vm.provision "ansible" do |ansible|
-  #     ansible.groups = groups
-  #     ansible.extra_vars = {
-  #     loopback_ip: "172.16.0.3",
-  #     asn: "64603",
-  #   }
-  #    ansible.playbook = "leafs.yml"
-  #   end
-  # end
+  config.vm.define "leaf3" do |leaf3| 
+   leaf3.vm.box = cumulus_image
+   leaf3.vm.network "private_network",  virtualbox__intnet: 'leaf3-spine1', auto_config: false
+   leaf3.vm.network "private_network",  virtualbox__intnet: 'leaf3-spine2', auto_config: false
+   leaf3.vm.network "private_network",  virtualbox__intnet: 'leaf3-ceph3', auto_config: false
+   leaf3.vm.network "private_network",  virtualbox__intnet: 'leaf3-ceph_admin', auto_config: false
+   leaf3.vm.host_name = "leaf3"
+   leaf3.vm.provision "ansible" do |ansible|
+     ansible.groups = groups
+     ansible.playbook = "lab.yml"
+    end
+  end
 
-  # config.vm.define "leaf4" do |leaf4| 
-  #  leaf4.vm.box = cumulus_image
-  #  leaf4.vm.network "private_network",  virtualbox__intnet: 'leaf4-spine1', auto_config: false
-  #  leaf4.vm.network "private_network",  virtualbox__intnet: 'leaf4-spine2', auto_config: false
-  #  leaf4.vm.network "private_network",  virtualbox__intnet: 'leaf4-ceph3', auto_config: false
-  #  leaf4.vm.network "private_network",  virtualbox__intnet: 'leaf4-ceph_admin', auto_config: false
-  #  leaf4.vm.host_name = "leaf4"
-  #  leaf4.vm.provision "ansible" do |ansible|
-  #     ansible.groups = groups
-  #     ansible.extra_vars = {
-  #     loopback_ip: "172.16.0.4",
-  #     asn: "64604",
-  #   }
-  #    ansible.playbook = "leafs.yml"
-  #   end
-  # end
+  config.vm.define "leaf4" do |leaf4| 
+   leaf4.vm.box = cumulus_image
+   leaf4.vm.network "private_network",  virtualbox__intnet: 'leaf4-spine1', auto_config: false
+   leaf4.vm.network "private_network",  virtualbox__intnet: 'leaf4-spine2', auto_config: false
+   leaf4.vm.network "private_network",  virtualbox__intnet: 'leaf4-ceph3', auto_config: false
+   leaf4.vm.network "private_network",  virtualbox__intnet: 'leaf4-ceph_admin', auto_config: false
+   leaf4.vm.host_name = "leaf4"
+   leaf4.vm.provision "ansible" do |ansible|
+     ansible.groups = groups
+     ansible.playbook = "lab.yml"
+    end
+  end
   
   config.vm.define "spine1" do |spine1| 
    spine1.vm.box = cumulus_image
@@ -90,12 +75,8 @@ Vagrant.configure("2") do |config|
    spine1.vm.network "private_network",  virtualbox__intnet: 'leaf4-spine1', auto_config: false
    spine1.vm.host_name = "spine1"
    spine1.vm.provision "ansible" do |ansible|
-      ansible.groups = groups
-      ansible.extra_vars = {
-      loopback_ip: "172.16.100.100",
-      asn: "65100",
-    }
-     ansible.playbook = "spines.yml"
+     ansible.groups = groups
+     ansible.playbook = "lab.yml"
     end
   end
 
@@ -108,11 +89,7 @@ Vagrant.configure("2") do |config|
    spine2.vm.host_name = "spine2"
    spine2.vm.provision "ansible" do |ansible|
       ansible.groups = groups
-      ansible.extra_vars = {
-      loopback_ip: "172.16.200.200",
-      asn: "65200",
-    }
-     ansible.playbook = "spines.yml"
+      ansible.playbook = "spines.yml"
     end
   end
 

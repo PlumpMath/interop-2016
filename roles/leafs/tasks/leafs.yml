@@ -1,91 +1,91 @@
----
-- name:  Configure BGP Unnumbered
-  hosts: all
-  sudo: yes
-  tasks:
+# ---
+# - name:  Configure BGP Unnumbered
+#   hosts: all
+#   sudo: yes
+#   tasks:
 
-  - name: Create interface source file
-    lineinfile: dest=/etc/network/interfaces line="source /etc/network/interfaces.d/*" state=present
-    notify: restart networking
+#   - name: Create interface source file
+#     lineinfile: dest=/etc/network/interfaces line="source /etc/network/interfaces.d/*" state=present
+#     notify: restart networking
 
-  - name: Remove lo from /etc/network/interfaces
-    lineinfile: dest=/etc/network/interfaces line="{{item}}" state=absent
-    with_items:
-      - auto lo
-      - iface lo inet loopback
-    notify: restart networking
+#   - name: Remove lo from /etc/network/interfaces
+#     lineinfile: dest=/etc/network/interfaces line="{{item}}" state=absent
+#     with_items:
+#       - auto lo
+#       - iface lo inet loopback
+#     notify: restart networking
 
-  - name: Create Loopback interface
-    lineinfile: dest=/etc/network/interfaces.d/lo line="auto lo\niface lo\naddress {{loopback_ip}}/32" create=yes
-    notify: restart networking
+#   - name: Create Loopback interface
+#     lineinfile: dest=/etc/network/interfaces.d/lo line="auto lo\niface lo\naddress {{loopback_ip}}/32" create=yes
+#     notify: restart networking
 
-  - name: Create Fabric ports
-    lineinfile: dest="/etc/network/interfaces.d/{{item}}" create=yes line="auto {{item}}\niface {{item}}"
-    with_items:
-      - swp1
-      - swp2
-      - swp3
-      - swp4
-    notify: restart networking
+#   - name: Create Fabric ports
+#     lineinfile: dest="/etc/network/interfaces.d/{{item}}" create=yes line="auto {{item}}\niface {{item}}"
+#     with_items:
+#       - swp1
+#       - swp2
+#       - swp3
+#       - swp4
+#     notify: restart networking
 
-  - name: Enable bgpd and zebra
-    replace: dest=/etc/quagga/daemons regexp='(bgpd|zebra)=no' replace='\1=yes' backup=yes
+#   - name: Enable bgpd and zebra
+#     replace: dest=/etc/quagga/daemons regexp='(bgpd|zebra)=no' replace='\1=yes' backup=yes
 
-  - name: Restart quagga
-    service: name=quagga state=restarted
+#   - name: Restart quagga
+#     service: name=quagga state=restarted
  
-  - name: Configure BGP ASN
-    command: "{{item}}"
-    with_items:
-      - cl-bgp as {{asn}} router-id set {{loopback_ip}}
-      - cl-bgp peer-group add fabric
-      - cl-bgp peer-group add servers
-      - cl-bgp maximum-paths set 16
-      - cl-bgp network add {{loopback_ip}}/32
-      - cl-bgp bestpath set as-path multipath-relax
-      # - vtysh -c 'config t' -c 'ip prefix-list ceph-loopbacks permit 10.0.0.0/24 ge 32'
-      # - vtysh -c 'config t' -c 'ip prefix-list default-route deny 0.0.0.0/0'
-      # - vtysh -c 'config t' -c 'ip prefix-list default-route permit 0.0.0.0/0 le 32'
+#   - name: Configure BGP ASN
+#     command: "{{item}}"
+#     with_items:
+#       - cl-bgp as {{asn}} router-id set {{loopback_ip}}
+#       - cl-bgp peer-group add fabric
+#       - cl-bgp peer-group add servers
+#       - cl-bgp maximum-paths set 16
+#       - cl-bgp network add {{loopback_ip}}/32
+#       - cl-bgp bestpath set as-path multipath-relax
+#       # - vtysh -c 'config t' -c 'ip prefix-list ceph-loopbacks permit 10.0.0.0/24 ge 32'
+#       # - vtysh -c 'config t' -c 'ip prefix-list default-route deny 0.0.0.0/0'
+#       # - vtysh -c 'config t' -c 'ip prefix-list default-route permit 0.0.0.0/0 le 32'
 
-  - name: Shared Peer Group Settings
-    command: "{{ item[0] | replace('%peer_group%', item[1]) }}"
-    with_nested:
-      - [ "cl-bgp neighbor add %peer_group% remote-as external",
-          "cl-bgp timers set connect 1 neighbor %peer_group%",
-          "cl-bgp timers set keepalive 1 holdtime 3 neighbor %peer_group%",
-          "cl-bgp advertisement-interval set 0 neighbor %peer_group%",
-          "cl-bgp capability set extended-nexthop neighbor %peer_group%",
-        ]
-      - ["fabric", "servers"]
+#   - name: Shared Peer Group Settings
+#     command: "{{ item[0] | replace('%peer_group%', item[1]) }}"
+#     with_nested:
+#       - [ "cl-bgp neighbor add %peer_group% remote-as external",
+#           "cl-bgp timers set connect 1 neighbor %peer_group%",
+#           "cl-bgp timers set keepalive 1 holdtime 3 neighbor %peer_group%",
+#           "cl-bgp advertisement-interval set 0 neighbor %peer_group%",
+#           "cl-bgp capability set extended-nexthop neighbor %peer_group%",
+#         ]
+#       - ["fabric", "servers"]
 
-  - name: Configure BGP Fabric Settings
-    command: "{{ item[0] | replace('%iface%', item[1]) }}"
-    with_nested: 
-      - ["cl-bgp interface add %iface%",
-         "cl-rctl interface clear %iface% ipv6 nd suppress-ra",
-         "cl-rctl interface set %iface% ipv6 nd ra-interval 5",
-         "cl-bgp neighbor add %iface% peer-group fabric",
-         # "cl-bgp prefix-list set default-route in neighbor fabric",
-        ]
-      - ["swp1", "swp2"]
+#   - name: Configure BGP Fabric Settings
+#     command: "{{ item[0] | replace('%iface%', item[1]) }}"
+#     with_nested: 
+#       - ["cl-bgp interface add %iface%",
+#          "cl-rctl interface clear %iface% ipv6 nd suppress-ra",
+#          "cl-rctl interface set %iface% ipv6 nd ra-interval 5",
+#          "cl-bgp neighbor add %iface% peer-group fabric",
+#          # "cl-bgp prefix-list set default-route in neighbor fabric",
+#         ]
+#       - ["swp1", "swp2"]
 
 
-  - name: Configure BGP Host Settings
-    command: "{{ item[0] | replace('%iface%', item[1]) }}"
-    with_nested: 
-      - ["cl-bgp interface add %iface%",
-         "cl-rctl interface clear %iface% ipv6 nd suppress-ra",
-         "cl-rctl interface set %iface% ipv6 nd ra-interval 5",
-         "cl-bgp neighbor add %iface% peer-group servers",
-         "cl-bgp neighbor add %iface% peer-group servers",
-         # "cl-bgp default-originate set neighbor servers ipv4 unicast",
-         # "cl-bgp prefix-list set ceph-loopbacks in neighbor servers",
-        ]
-      - ["swp3", "swp4"]
+#   - name: Configure BGP Host Settings
+#     command: "{{ item[0] | replace('%iface%', item[1]) }}"
+#     with_nested: 
+#       - ["cl-bgp interface add %iface%",
+#          "cl-rctl interface clear %iface% ipv6 nd suppress-ra",
+#          "cl-rctl interface set %iface% ipv6 nd ra-interval 5",
+#          "cl-bgp neighbor add %iface% peer-group servers",
+#          "cl-bgp neighbor add %iface% peer-group servers",
+#          # "cl-bgp default-originate set neighbor servers ipv4 unicast",
+#          # "cl-bgp prefix-list set ceph-loopbacks in neighbor servers",
+#         ]
+#       - ["swp3", "swp4"]
 
-  # - name: Save BGP Config
-  #   command: cl-rctl write-config integrated
+#   # - name: Save BGP Config
+#   #   command: cl-rctl write-config integrated
 
-  handlers:
-    - name: restart networking
-      service: name=networking state=reloaded
+#   handlers:
+#     - name: restart networking
+#       service: name=networking state=reloaded
