@@ -2,7 +2,7 @@
 # vi: set ft=ruby :
 
 groups = {
-  "spines" => ["spine1"],
+  "spines" => ["spine1", "spine2"],
   "leafs" => ["leaf1", "leaf2", "leaf3", "leaf4"],
   "servers" => ["ceph1", "ceph2", "ceph3", "ceph-admin"],
   "network:children" => ["spines", "leafs"]
@@ -89,7 +89,7 @@ Vagrant.configure("2") do |config|
    spine2.vm.host_name = "spine2"
    spine2.vm.provision "ansible" do |ansible|
       ansible.groups = groups
-      ansible.playbook = "spines.yml"
+      ansible.playbook = "lab.yml"
     end
   end
 

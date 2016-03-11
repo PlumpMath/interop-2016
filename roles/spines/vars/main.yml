@@ -11,6 +11,12 @@ interfaces:
     swp2:
       alias: "To leaf 2"
 
+    swp3:
+      alias: "To leaf 3"
+      
+    swp4:
+      alias: "To leaf 4"
+
   spine2:
     lo:
       ipv6: "fd::100:200/128"
@@ -22,6 +28,11 @@ interfaces:
     swp2:
       alias: "To leaf 2"
 
+    swp3:
+      alias: "To leaf 3"
+      
+    swp4:
+      alias: "To leaf 4"
   
 bgp:
 
