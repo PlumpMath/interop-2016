@@ -12,19 +12,44 @@ import json
 spine_vars_location = "../roles/spines/vars/main.yml"
 leaf_vars_location = "../roles/leafs/vars/main.yml"
 spine_bgp_neighbor_config = dict() 
+leaf_bgp_neighbor_config = dict()
 spine_vars = dict()
+list_of_leafs = []
+list_of_spines = []
 
 
 def get_spine_vars(context):
     '''
-    Open the Ansible vars file and load it into spine_vars
+    Open the Ansible vars file for spines and load it into spine_vars
     '''
+    global list_of_spines
 
     with open(spine_vars_location) as stream:
         try:
             context.spine_vars = yaml.load(stream)
         except yaml.YAMLError as exc:
             assert False, "Failed to load spine variables file: " + exc
+
+    if "bgp" in context.spine_vars.keys():
+        for node in context.spine_vars["bgp"]:
+            list_of_spines.append(node)
+
+
+def get_leaf_vars(context):
+    '''
+    Open the Ansible vars file for leafs and load it into spine_vars
+    '''
+    global list_of_leafs
+
+    with open(leaf_vars_location) as stream:
+        try:
+            context.leaf_vars = yaml.load(stream)
+        except yaml.YAMLError as exc:
+            assert False, "Failed to load leaf variables file: " + exc
+
+    if "bgp" in context.leaf_vars.keys():
+        for node in context.leaf_vars["bgp"]:
+            list_of_leafs.append(node)
 
 
 def get_spine_bgp_neighbors(context):
@@ -36,16 +61,33 @@ def get_spine_bgp_neighbors(context):
 
     runner = ansible.runner.Runner(module_name='command', 
                                    module_args="cl-bgp summary show json",
-                                   become=True, pattern="spine2")
+                                   become=True, pattern=list_of_spines)
 
     ansible_output = runner.run()
 
     if ansible_output is None:
         assert False, "Ansible is unable to contact the host"
 
-    spine_bgp_neighbor_config = json.loads(
-                                            ansible_output['contacted'].
-                                            items()[0][1]["stdout"].strip('"'))
+    spine_bgp_neighbor_config = ansible_output["contacted"]
+
+
+def get_leaf_bgp_neighbors(context):
+    ''' 
+    Make Ansible API call to pull data directly from the node.
+    Return data in json format
+    '''
+    global leaf_bgp_neighbor_config
+
+    runner = ansible.runner.Runner(module_name='command', 
+                                   module_args="cl-bgp summary show json",
+                                   become=True, pattern=list_of_leafs)
+
+    ansible_output = runner.run()
+
+    if ansible_output is None:
+        assert False, "Ansible is unable to contact the host"
+
+    leaf_bgp_neighbor_config = ansible_output["contacted"]
 
 
 def get_spine_var_bgp_ports(context):
@@ -69,11 +111,16 @@ def get_spine_config_ports(context):
     '''
     Extract the interface list from the configured node. Convert to Ascii to make life easy
     '''
-
-    if "peers" in spine_bgp_neighbor_config:
-        return [s.encode('ascii') for s in spine_bgp_neighbor_config["peers"].keys()]
-    else:
-        assert False, "No peer configuration on the device"
+    for spine in list_of_spines:
+        assert False, spine
+        if spine["stdout"] is None:
+            assert False, "No BGP neighbors found."
+        else:
+            if "peers" in spine_bgp_neighbor_config:
+                context.spine_port_list[spine] = [s.encode('ascii') for s in spine_bgp_neighbor_config["peers"].keys()]
+                assert False, spine_port_list
+            else:
+                assert False, "No BGP neighbor configuration on device"
 
 
 def is_bgp_var_defined(context):
@@ -94,25 +141,22 @@ def is_bgp_configured(context):
     assert True
 
 
-def is_bgp_established(context):
-    '''
-    Given an interface, is the peer up?
-    '''
-
-    return True
-
-
 @given('BGP is enabled')
 def step_impl(context):
 
     # Setup: Load Vars
     get_spine_vars(context)
+    get_leaf_vars(context)
 
     # Setup: Load Config
     get_spine_bgp_neighbors(context)
+    get_leaf_bgp_neighbors(context)
 
     # Only checking that BGP is in the vars file (i.e., it should be enabled)
-    assert is_bgp_var_defined(context), spine_bgp_neighbor_config
+    if len(list_of_spines) > 0 or len(list_of_leafs) > 0:
+        assert True
+    else:
+        assert False, "No BGP peers defined in Ansible vars files for spines or leafs."
 
 
 @when('neighbors are configured')
