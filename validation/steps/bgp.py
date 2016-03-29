@@ -1,5 +1,6 @@
 from behave import *
-import ansible.runner, yaml
+import ansible.runner
+import yaml
 import json
 
 '''
@@ -37,7 +38,7 @@ def get_spine_vars(context):
 
 def get_leaf_vars(context):
     '''
-    Open the Ansible vars file for leafs and load it into spine_vars
+    Open the Ansible vars file for leafs and load it into leaf_vars
     '''
     global list_of_leafs
 
@@ -90,55 +91,45 @@ def get_leaf_bgp_neighbors(context):
     leaf_bgp_neighbor_config = ansible_output["contacted"]
 
 
-def get_spine_var_bgp_ports(context):
-    '''
-    Return list of BGP ports from the Ansible vars file
-    '''
-
-    if "bgp" in context.spine_vars:
-        if "spine2" in context.spine_vars["bgp"]:
-            if "fabric_ports" in context.spine_vars["bgp"]["spine2"]:
-                return context.spine_vars["bgp"]["spine2"]["fabric_ports"]
-            else:
-                assert False, "fabric_ports not defined in Ansible vars file"
-        else:
-            assert False, "spine2 not defined in Ansible vars file"
-    else:
-        assert False, "bgp not defined in Ansible vars file"
-
-
 def get_spine_config_ports(context):
     '''
     Extract the interface list from the configured node. Convert to Ascii to make life easy
     '''
+    global spine_bgp_neighbor_config
+
+    return_dict = dict()
+
     for spine in list_of_spines:
-        assert False, spine
-        if spine["stdout"] is None:
-            assert False, "No BGP neighbors found."
+        if spine_bgp_neighbor_config[spine]["stdout"] == "":
+            assert False, "No BGP configuration found on " + spine
+
         else:
-            if "peers" in spine_bgp_neighbor_config:
-                context.spine_port_list[spine] = [s.encode('ascii') for s in spine_bgp_neighbor_config["peers"].keys()]
-                assert False, spine_port_list
-            else:
-                assert False, "No BGP neighbor configuration on device"
+            json_data = json.loads(spine_bgp_neighbor_config[spine]["stdout"])
+
+            if len(json_data["peers"]) == 0:
+                assert False, "No peers found on " + spine
+
+            return_dict[spine] = json_data["peers"].keys()
 
 
-def is_bgp_var_defined(context):
+def get_leaf_config_ports(context):
     '''
-    Determine if BGP has been configured in the Ansible vars file
-    '''
-    if "bgp" in context.spine_vars:
-        return True
-    else:
-        assert False, "BGP not configured in Ansible vars file"
-
-
-def is_bgp_configured(context):
-    '''
-    Determine if BGP configuration was pushed to the device
+    Extract the interface list from the configured node. Convert to Ascii to make life easy
     '''
 
-    assert True
+    global leaf_bgp_neighbor_config
+
+    for leaf in list_of_leafs:
+        if leaf_bgp_neighbor_config[leaf]["stdout"] == "":
+            assert False, "No BGP configuration found on " + leaf
+
+        else:
+            json_data = json.loads(leaf_bgp_neighbor_config[leaf]["stdout"])
+
+            if len(json_data["peers"]) == 0:
+                assert False, "No peers found on " + leaf
+
+            return json_data["peers"].keys()
 
 
 @given('BGP is enabled')
@@ -165,28 +156,88 @@ def step_impl(context):
     Actually check that the BGP config was pushed to the box 
     and that the number of peers on the box matches what we expect
     '''
-    config_port_list = get_spine_config_ports(context)
-    var_port_list = get_spine_var_bgp_ports(context)
 
-    if set(config_port_list) == set(var_port_list):
-        assert True
-    else:
-        assert False, "Port lists do not match. Vars: " + str(var_port_list) + " Configured: " + str(config_port_list)
+    spine_var_ports = dict()
+    spine_config_ports = dict()
+    leaf_var_ports = dict()
+    leaf_config_ports = dict()
+
+    # Iterate over Spine Variables File
+    if "bgp" in context.spine_vars:
+            for spine in context.spine_vars["bgp"].keys():
+                if "fabric_ports" in context.spine_vars["bgp"][spine]:
+                    spine_var_ports[spine] = context.spine_vars["bgp"][spine]["fabric_ports"]
+                else:
+                    assert False, "fabric_ports not defined in Ansible vars file for " + spine
+
+    # Iterate over Leaf Variables File
+    if "bgp" in context.leaf_vars:
+        for leaf in context.leaf_vars["bgp"].keys():
+            if "fabric_ports" in context.leaf_vars["bgp"][leaf]:
+                leaf_var_ports[leaf] = context.leaf_vars["bgp"][leaf]["fabric_ports"]
+            else:
+                assert False, "fabric_ports not defined in Ansible vars file for " + leaf
+
+    for spine in list_of_spines:
+        if spine_bgp_neighbor_config[spine]["stdout"] == "":
+            assert False, "No BGP configuration found on " + spine
+        else:
+            json_data = json.loads(spine_bgp_neighbor_config[spine]["stdout"])
+
+            if len(json_data["peers"]) == 0:
+                assert False, "No peers found on " + spine
+
+            # convert unicode elements to ascii
+            spine_config_ports[spine] = [s.encode('ascii') for s in json_data["peers"].keys()]
+
+    for leaf in list_of_leafs:
+        if leaf_bgp_neighbor_config[leaf]["stdout"] == "":
+            assert False, "no BGP configuration found on " + leaf
+        else:
+            json_data = json.loads(leaf_bgp_neighbor_config[leaf]["stdout"])
+
+            if len(json_data["peers"]) == 0:
+                assert False, "No peers found on " + leaf
+
+            # convert unicode elements to ascii
+            leaf_config_ports[leaf] = [s.encode('ascii') for s in json_data["peers"].keys()] 
+
+    for leaf in leaf_var_ports:
+        if not set(leaf_var_ports[leaf]) == set(leaf_config_ports[leaf]):
+            assert False, "Configured leaf ports do not match variables file ports"
+
+    for spine in spine_var_ports:
+        if not set(spine_var_ports[spine]) == set(spine_config_ports[spine]):
+            assert False, "Configured spine ports do not match variables file ports"
+
+    assert True
 
 
 @then('the neighbors should be up')
 def step_impl(context):
+    '''
+    Validate that the BGP state from Ansible is "Established"
+    '''
 
-    failed_list = []
+    global spine_bgp_neighbor_config, list_of_spines
+    global leaf_bgp_neighbor_config, list_of_leafs
 
-    if "peers" in spine_bgp_neighbor_config:
-        for interface, state in spine_bgp_neighbor_config["peers"].iteritems():
-            if not state["state"] == "Established":
-                failed_list.append([interface.encode('ascii'), state["state"].encode('ascii')])
-    else:
-        assert False, "No Peers found in BGP configuration"
+    for spine in list_of_spines:
+        json_data = json.loads(spine_bgp_neighbor_config[spine]["stdout"])
 
-    if len(failed_list) > 0:
-        assert False, "Not all peers are up. The following peers are down: " + str(failed_list)
-    else:
-        assert True
+        neighbor_list = json_data["peers"].keys()
+
+        for neighbor in neighbor_list:
+            if not json_data["peers"][neighbor]["state"] == "Established":
+                assert False, spine + " peer " + neighbor + " not Established. Current state: " + json_data["peers"][neighbor]["state"]
+
+    for leaf in list_of_leafs:
+        json_data = json.loads(leaf_bgp_neighbor_config[leaf]["stdout"])
+
+        neighbor_list = json_data["peers"].keys()
+
+        for neighbor in neighbor_list:
+            if not json_data["peers"][neighbor]["state"] == "Established":
+                assert False, leaf + " peer " + neighbor + " not Established. Current state: " + json_data["peers"][neighbor]["state"]
+
+    assert True

@@ -49,19 +49,19 @@ bgp:
   leaf1:
     asn: "64601"
     fabric_ports: ["swp1", "swp2"]
-    server_ports: ["swp3", "swp4"]
+    #server_ports: ["swp3", "swp4"]
 
   leaf2:
     asn: "64602"
     fabric_ports: ["swp1", "swp2"]
-    server_ports: ["swp3", "swp4"]
+    #server_ports: ["swp3", "swp4"]
 
   leaf3:
     asn: "64603"
     fabric_ports: ["swp1", "swp2"]
-    server_ports: ["swp3", "swp4"]
+    #server_ports: ["swp3", "swp4"]
 
   leaf4:
     asn: "64604"
     fabric_ports: ["swp1", "swp2"]
-    server_ports: ["swp3", "swp4"]
+    #server_ports: ["swp3", "swp4"]

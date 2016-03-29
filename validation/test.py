@@ -27,30 +27,31 @@ spine_vars = get_spine_vars()
 
 
 #print spine_vars["bgp"]["spine1"]["fabric_ports"]
-
+list_of_spines = ["spine1", "spine2"]
 runner = ansible.runner.Runner(module_name='command', module_args="cl-bgp summary show json", 
-                               become=True, pattern="spine2")
+                               become=True, pattern=list_of_spines)
 
 #runner = ansible.runner.Runner(module_name="ping", module_args="", pattern="all")
 datas = runner.run()
 
+print datas
 # Hostname: datas['contacted'].items()[0][0]
 # command output: datas['contacted'].items()[0][1]["stdout"]
-command_output = json.loads(datas['contacted'].items()[0][1]["stdout"].strip('"'))
+#command_output = json.loads(datas['contacted'].items()[0][1]["stdout"].strip('"'))
 
 #convert json output to ASCII, return only swp list
-d = [s.encode('ascii') for s in command_output["peers"].keys()] 
+#d = [s.encode('ascii') for s in command_output["peers"].keys()] 
 
 
 
 # print d
 
-print "bgp" in spine_vars#["bgp"]["spine1"]["fabric_ports"]
+#print "bgp" in spine_vars#["bgp"]["spine1"]["fabric_ports"]
 
 # print set(spine_vars)
 # print set(d)
 
 
-for interface, data in command_output["peers"].iteritems():
-    #print interface + " " + data["state"]
-    print data
+# for interface, data in command_output["peers"].iteritems():
+#     #print interface + " " + data["state"]
+#     print data
