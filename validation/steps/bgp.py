@@ -204,11 +204,11 @@ def step_impl(context):
 
     for leaf in leaf_var_ports:
         if not set(leaf_var_ports[leaf]) == set(leaf_config_ports[leaf]):
-            assert False, "Configured leaf ports do not match variables file ports"
+            assert False, "Configured leaf ports do not match variables file ports for " + leaf
 
     for spine in spine_var_ports:
         if not set(spine_var_ports[spine]) == set(spine_config_ports[spine]):
-            assert False, "Configured spine ports do not match variables file ports"
+            assert False, "Configured spine ports do not match variables file ports for " + spine
 
     assert True
 

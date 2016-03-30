@@ -90,7 +90,7 @@ def get_leaf_interfaces(context):
         assert False, "Ansible is unable to contact the host"
 
     leaf_interface_config = ansible_output["contacted"]
- 
+
 
 @given('an interface is configured')
 def step_impl(context):
@@ -109,15 +109,12 @@ def step_impl(context):
     else:
         assert False, "No interfaces defined in Ansible vars files for spines or leafs."
 
+
 @then('the interfaces should be up')
 def step_impl(context):
 
-    # global spine_bgp_neighbor_config, list_of_spines
-    # global leaf_bgp_neighbor_config, list_of_leafs
-
     for spine in list_of_spines:
         json_data = json.loads(spine_interface_config[spine]["stdout"])
-        # configured_iface_list = json_data.keys()
         var_interface_list = context.spine_vars["interfaces"][spine].keys()
 
         for interface in var_interface_list:
@@ -125,4 +122,15 @@ def step_impl(context):
                 continue
             else:
                 assert False, "Interface " + interface + " on " + spine + " is in state " + json_data[interface]["linkstate"]
+
+    for leaf in list_of_leafs:
+        json_data = json.loads(leaf_interface_config[leaf]["stdout"])
+        var_interface_list = context.leaf_vars["interfaces"][leaf].keys()
+
+        for interface in var_interface_list:
+            if json_data[interface]["linkstate"] == "UP":
+                continue
+            else:
+                assert False, "Interface " + interface + " on " + leaf + " is in state " + json_data[interface]["linkstate"]
+
     assert True
