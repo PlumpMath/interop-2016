@@ -5,7 +5,7 @@ before_script:
 
 Lint_and_Launch:
    script:
-      - linter.sh
+      - bash linter.sh
       - cd /Users/plumbis/vagrant/interop-2016/validation
       - vagrant up --color
       - sleep 10
