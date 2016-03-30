@@ -13,11 +13,11 @@
     - common
     - leafs
   handlers:
-    - include : handlers/main.yml
+    - include: handlers/main.yml
 
 - hosts: servers
   sudo: yes
   roles:
     - servers
   handlers:
-    - include : handlers/main.yml
+    - include: handlers/main.yml

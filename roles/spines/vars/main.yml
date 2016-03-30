@@ -1,3 +1,4 @@
+---
 interfaces:
 
   spine1:
@@ -7,13 +8,13 @@ interfaces:
 
     swp1:
       alias: "To leaf 1"
-      
+
     swp2:
       alias: "To leaf 2"
 
     swp3:
       alias: "To leaf 3"
-      
+
     swp4:
       alias: "To leaf 4"
 
@@ -30,16 +31,16 @@ interfaces:
 
     swp3:
       alias: "To leaf 3"
-      
+
     swp4:
       alias: "To leaf 4"
-  
+
 bgp:
 
   spine1:
     asn: "65100"
     fabric_ports: ["swp1", "swp2", "swp3", "swp4"]
-    
+
 
   spine2:
     asn: "65200"
