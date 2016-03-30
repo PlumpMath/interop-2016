@@ -1,10 +1,19 @@
 ---
 before_script:
+   - cd /Users/plumbis/vagrant/interop-2016/
+   - vagrant destroy -f
 
 linter:
   script:
-    - find . -type f -iname "*.yml" -print0 | while IFS= read -r -d $'\0' line; do
+    - find cd /Users/plumbis/vagrant/interop-2016/ -type f -iname "*.yml" -print0 | while IFS= read -r -d $'\0' line; do
     - yamllint "$line" || exit
     - done
 
+launch_vx:
+  script:
+    - cd /Users/plumbis/vagrant/interop-2016/validation
+    - vagrant up --color
+    - sleep 10
+    - behave --force-color
+    - sleep 10
 
