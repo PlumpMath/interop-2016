@@ -3,11 +3,9 @@ before_script:
    - cd /Users/plumbis/vagrant/interop-2016/
    - vagrant destroy -f
 
-linter:
+Lint_and_Launch:
    script:
       - linter.sh
-
-   script:
       - cd /Users/plumbis/vagrant/interop-2016/validation
       - vagrant up --color
       - sleep 10
