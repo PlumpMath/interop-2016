@@ -6,7 +6,7 @@ before_script:
 linter:
    script:
       - >
-         find cd /Users/plumbis/vagrant/interop-2016/
+         find /Users/plumbis/vagrant/interop-2016/
           -type f -iname "*.yml" -print0 | while IFS= read -r -d $'\0' line; do
       - yamllint "$line" || exit
       - done
