@@ -48,7 +48,7 @@ bgp:
 
   leaf1:
     asn: "64601"
-    fabric_ports: ["swp1", "swp2"]
+    fabric_ports: ["swp1", "swp32"]
     #server_ports: ["swp3", "swp4"]
 
   leaf2:
