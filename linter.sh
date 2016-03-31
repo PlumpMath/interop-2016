@@ -1,10 +1,11 @@
 #!/usr/bin/env bash
 
 
-find . -type f -iname "*.yml" -print0 | while IFS= read -r -d $'\0' line; do
-    yamllint "$line" || exit   
+for file in $(find . -name "*.yml")
+do
+    yamllint $file
+    rc=$?
+    if [ "$rc" -ne 0 ] ; then
+        exit $rc
+    fi
 done
-
-echo -e "YAML Linting Successful"
-
-exit 0
