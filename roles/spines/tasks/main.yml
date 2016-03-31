@@ -1,4 +1,4 @@
----
+
 - name: Copy /etc/network/interfaces
   template: src=interfaces.j2 dest=/etc/network/interfaces
   notify: reload networking
