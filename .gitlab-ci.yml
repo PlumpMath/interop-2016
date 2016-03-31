@@ -3,10 +3,10 @@ before_script:
    - cd /Users/plumbis/vagrant/interop-2016/
    - vagrant destroy -f
 
-stages: 
-    - lint
-    - behave
-    - cleanup
+stages:
+   - lint
+   - behave
+   - cleanup
 
 lint:
    stage: lint
@@ -14,8 +14,8 @@ lint:
       - bash linter.sh
 
 launch_lab:
-    stage: behave
-    script:
+   stage: behave
+   script:
       - cd /Users/plumbis/vagrant/interop-2016/validation
       - vagrant up --color
       - sleep 10
@@ -23,6 +23,6 @@ launch_lab:
       - sleep 10
 
 flush_vagrant:
-    stage: cleanup
-    script:
+   stage: cleanup
+   script:
       - vagrant destroy -f
