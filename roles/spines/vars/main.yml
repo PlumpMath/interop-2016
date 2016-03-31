@@ -39,7 +39,7 @@ bgp:
 
   spine1:
     asn: "65100"
-    fabric_ports: ["swp12", "swp2", "swp3", "swp4"]
+    fabric_ports: ["swp1", "swp2", "swp3", "swp4"]
 
 
   spine2:
