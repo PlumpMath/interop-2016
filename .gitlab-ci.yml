@@ -1,6 +1,7 @@
 ---
 before_script:
    - cd /Users/plumbis/vagrant/interop-2016/
+   - vagrant destroy -f
 
 stages:
    - lint
@@ -14,8 +15,6 @@ lint:
 
 launch_lab:
    stage: behave
-   only:
-      - master
    script:
       - cd /Users/plumbis/vagrant/interop-2016/validation
       - vagrant destroy -f
@@ -26,7 +25,5 @@ launch_lab:
 
 flush_vagrant:
    stage: cleanup
-   only:
-      - master
    script:
       - vagrant destroy -f
