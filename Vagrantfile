@@ -4,7 +4,7 @@
 groups = {
   "spines" => ["spine1", "spine2"],
   "leafs" => ["leaf1", "leaf2", "leaf3", "leaf4"],
-  "servers" => ["ceph1", "ceph2", "ceph3", "ceph-admin"],
+  "servers" => ["server1", "server2", "server3", "server-admin"],
   "network:children" => ["spines", "leafs"]
 }
 
@@ -12,14 +12,14 @@ groups = {
 Vagrant.configure("2") do |config|
 
   cumulus_image = "cumulus-vx-2.5.5"
-  ceph_image = "ubuntu/precise64"
+  server_image = "ubuntu/precise64"
 
   config.vm.define "leaf1" do |leaf1| 
    leaf1.vm.box = cumulus_image
    leaf1.vm.network "private_network",  virtualbox__intnet: 'leaf1-spine1', auto_config: false
    leaf1.vm.network "private_network",  virtualbox__intnet: 'leaf1-spine2', auto_config: false
-   leaf1.vm.network "private_network",  virtualbox__intnet: 'leaf1-ceph1', auto_config: false
-   leaf1.vm.network "private_network",  virtualbox__intnet: 'leaf1-ceph2', auto_config: false
+   leaf1.vm.network "private_network",  virtualbox__intnet: 'leaf1-server1', auto_config: false
+   leaf1.vm.network "private_network",  virtualbox__intnet: 'leaf1-server2', auto_config: false
    leaf1.vm.host_name = "leaf1"
    leaf1.vm.provision "ansible" do |ansible|
     ansible.groups = groups
@@ -32,8 +32,8 @@ Vagrant.configure("2") do |config|
    leaf2.vm.box = cumulus_image 
    leaf2.vm.network "private_network",  virtualbox__intnet: 'leaf2-spine1', auto_config: false
    leaf2.vm.network "private_network",  virtualbox__intnet: 'leaf2-spine2', auto_config: false
-   leaf2.vm.network "private_network",  virtualbox__intnet: 'leaf2-ceph1', auto_config: false
-   leaf2.vm.network "private_network",  virtualbox__intnet: 'leaf2-ceph2', auto_config: false
+   leaf2.vm.network "private_network",  virtualbox__intnet: 'leaf2-server1', auto_config: false
+   leaf2.vm.network "private_network",  virtualbox__intnet: 'leaf2-server2', auto_config: false
    leaf2.vm.host_name = "leaf2"
    leaf2.vm.provision "ansible" do |ansible|
     ansible.groups = groups
@@ -45,8 +45,8 @@ Vagrant.configure("2") do |config|
    leaf3.vm.box = cumulus_image
    leaf3.vm.network "private_network",  virtualbox__intnet: 'leaf3-spine1', auto_config: false
    leaf3.vm.network "private_network",  virtualbox__intnet: 'leaf3-spine2', auto_config: false
-   leaf3.vm.network "private_network",  virtualbox__intnet: 'leaf3-ceph3', auto_config: false
-   leaf3.vm.network "private_network",  virtualbox__intnet: 'leaf3-ceph_admin', auto_config: false
+   leaf3.vm.network "private_network",  virtualbox__intnet: 'leaf3-server3', auto_config: false
+   leaf3.vm.network "private_network",  virtualbox__intnet: 'leaf3-server_admin', auto_config: false
    leaf3.vm.host_name = "leaf3"
    leaf3.vm.provision "ansible" do |ansible|
      ansible.groups = groups
@@ -58,8 +58,8 @@ Vagrant.configure("2") do |config|
    leaf4.vm.box = cumulus_image
    leaf4.vm.network "private_network",  virtualbox__intnet: 'leaf4-spine1', auto_config: false
    leaf4.vm.network "private_network",  virtualbox__intnet: 'leaf4-spine2', auto_config: false
-   leaf4.vm.network "private_network",  virtualbox__intnet: 'leaf4-ceph3', auto_config: false
-   leaf4.vm.network "private_network",  virtualbox__intnet: 'leaf4-ceph_admin', auto_config: false
+   leaf4.vm.network "private_network",  virtualbox__intnet: 'leaf4-server3', auto_config: false
+   leaf4.vm.network "private_network",  virtualbox__intnet: 'leaf4-server_admin', auto_config: false
    leaf4.vm.host_name = "leaf4"
    leaf4.vm.provision "ansible" do |ansible|
      ansible.groups = groups
@@ -93,12 +93,12 @@ Vagrant.configure("2") do |config|
     end
   end
 
-  # config.vm.define "ceph1" do |ceph1| 
-  #  ceph1.vm.box = "ubuntu/trusty64"
-  #  ceph1.vm.network "private_network",  virtualbox__intnet: 'leaf1-ceph1', auto_config: false
-  #  ceph1.vm.network "private_network",  virtualbox__intnet: 'leaf2-ceph1', auto_config: false
-  #  ceph1.vm.host_name = "ceph1"
-  #  ceph1.vm.provision "ansible" do |ansible|
+  # config.vm.define "server1" do |server1| 
+  #  server1.vm.box = "ubuntu/trusty64"
+  #  server1.vm.network "private_network",  virtualbox__intnet: 'leaf1-server1', auto_config: false
+  #  server1.vm.network "private_network",  virtualbox__intnet: 'leaf2-server1', auto_config: false
+  #  server1.vm.host_name = "server1"
+  #  server1.vm.provision "ansible" do |ansible|
   #     ansible.groups = groups
   #     ansible.extra_vars = {
   #     loopback_ip: "10.0.0.1",
@@ -106,16 +106,16 @@ Vagrant.configure("2") do |config|
   #     fabric_ports: ["eth1", "eth2"],
   #     interface_list: ["lo", "eth1", "eth2"]
   #   }
-  #    ansible.playbook = "ceph.yml"
+  #    ansible.playbook = "server.yml"
   #   end
   # end
   
-  # config.vm.define "ceph2" do |ceph2| 
-  #  ceph2.vm.box = ceph_image
-  #  ceph2.vm.network "private_network",  virtualbox__intnet: 'leaf1-ceph2', auto_config: false
-  #  ceph2.vm.network "private_network",  virtualbox__intnet: 'leaf2-ceph2', auto_config: false
-  #  ceph2.vm.host_name = "ceph2"
-  #  ceph2.vm.provision "ansible" do |ansible|
+  # config.vm.define "server2" do |server2| 
+  #  server2.vm.box = server_image
+  #  server2.vm.network "private_network",  virtualbox__intnet: 'leaf1-server2', auto_config: false
+  #  server2.vm.network "private_network",  virtualbox__intnet: 'leaf2-server2', auto_config: false
+  #  server2.vm.host_name = "server2"
+  #  server2.vm.provision "ansible" do |ansible|
   #     ansible.groups = groups
   #     ansible.extra_vars = {
   #     loopback_ip: "10.0.0.2",
@@ -123,41 +123,9 @@ Vagrant.configure("2") do |config|
   #     fabric_ports: ["eth1", "eth2"],
   #     interface_list: ["lo", "eth1", "eth2"]
   #   }
-  #    ansible.playbook = "ceph.yml"
+  #    ansible.playbook = "server.yml"
   #   end
   # end
 
-  # config.vm.define "ceph3" do |ceph3| 
-  #  ceph3.vm.box = "ubuntu/trusty64"
-  #  ceph3.vm.network "private_network",  virtualbox__intnet: 'leaf3-ceph3', auto_config: false
-  #  ceph3.vm.network "private_network",  virtualbox__intnet: 'leaf4-ceph3', auto_config: false
-  #  ceph3.vm.host_name = "ceph3"
-  #  ceph3.vm.provision "ansible" do |ansible|
-  #     ansible.groups = groups
-  #     ansible.extra_vars = {
-  #     loopback_ip: "10.0.0.3",
-  #     asn: "65500",
-  #     fabric_ports: ["eth1", "eth2"],
-  #     interface_list: ["lo", "eth1", "eth2"]
-  #   }
-  #    ansible.playbook = "ceph.yml"
-  #   end
-  # end
 
-  # config.vm.define "ceph-admin" do |ceph_admin| 
-  #  ceph_admin.vm.box = ceph_image
-  #  ceph_admin.vm.network "private_network",  virtualbox__intnet: 'leaf3-ceph_admin', auto_config: false
-  #  ceph_admin.vm.network "private_network",  virtualbox__intnet: 'leaf4-ceph_admin', auto_config: false
-  #  ceph_admin.vm.host_name = "ceph-admin"
-  #  ceph_admin.vm.provision "ansible" do |ansible|
-  #     ansible.groups = groups
-  #     ansible.extra_vars = {
-  #     loopback_ip: "10.0.0.4",
-  #     asn: "65500",
-  #     fabric_ports: ["eth1", "eth2"],
-  #     interface_list: ["lo", "eth1", "eth2"]
-  #   }
-  #    ansible.playbook = "ceph.yml"
-  #   end
-  # end
 end

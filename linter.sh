@@ -9,3 +9,7 @@ do
         exit $rc
     fi
 done
+
+echo "Linting Passed"
+
+exit 0
